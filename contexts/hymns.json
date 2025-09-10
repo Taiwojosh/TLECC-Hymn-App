@@ -1,0 +1,170 @@
+
+[
+  {
+    "id": 1,
+    "title_en": "The Solid Rock",
+    "title_yo": "Apata Aiyeraiye",
+    "first_line_en": "My hope is built on nothing less",
+    "first_line_yo": "Igbekele mi ko si n’nu kan",
+    "lyrics_en": [
+      {
+        "type": "stanza",
+        "lines": [
+          "My hope is built on nothing less",
+          "Than Jesus' blood and righteousness;",
+          "I dare not trust the sweetest frame,",
+          "But wholly lean on Jesus' name."
+        ]
+      },
+      {
+        "type": "chorus",
+        "lines": [
+          "On Christ, the solid Rock, I stand;",
+          "All other ground is sinking sand,",
+          "All other ground is sinking sand."
+        ]
+      },
+      {
+        "type": "stanza",
+        "lines": [
+          "When darkness veils His lovely face,",
+          "I rest on His unchanging grace;",
+          "In every high and stormy gale,",
+          "My anchor holds within the veil."
+        ]
+      }
+    ],
+    "lyrics_yo": [
+      {
+        "type": "stanza",
+        "lines": [
+          "Igbekele mi ko si n’nu kan,",
+          "Lehin eje at’ ododo Jesu;",
+          "Nko j’ori si ayo kan le,",
+          "Sugbon mo f’ori le Oruko Jesu."
+        ]
+      },
+      {
+        "type": "chorus",
+        "lines": [
+          "Mo duro le Krist’ Apata,",
+          "Ile miran, iyanrin ni.",
+          "Ile miran, iyanrin ni."
+        ]
+      },
+      {
+        "type": "stanza",
+        "lines": [
+          "B’ire-ije ba bo oju Re,",
+          "Mo f’ore-ofe Re t’o daju han;",
+          "N’nu iji lile at’ ide,",
+          "Irora mi duro n’nu ike."
+        ]
+      }
+    ],
+    "category": "Faith and Trust",
+    "tune_code": "8.8.8.8.8.8."
+  },
+  {
+    "id": 2,
+    "title_en": "Amazing Grace",
+    "title_yo": "Oore-ofe Iyanu",
+    "first_line_en": "Amazing grace! how sweet the sound",
+    "first_line_yo": "Oore-ofe t’o dun to yi",
+    "lyrics_en": [
+      {
+        "type": "stanza",
+        "lines": [
+          "Amazing grace! how sweet the sound,",
+          "That saved a wretch like me!",
+          "I once was lost, but now am found,",
+          "Was blind, but now I see."
+        ]
+      },
+      {
+        "type": "stanza",
+        "lines": [
+          "'Twas grace that taught my heart to fear,",
+          "And grace my fears relieved;",
+          "How precious did that grace appear",
+          "The hour I first believed!"
+        ]
+      }
+    ],
+    "lyrics_yo": [
+      {
+        "type": "stanza",
+        "lines": [
+          "Oore-ofe t’o dun to yi,",
+          "Gba omo-ale bi emi!",
+          "Mo ti sonu, sugbon mo ri,",
+          "Mo fo, sugbon mo riran."
+        ]
+      },
+      {
+        "type": "stanza",
+        "lines": [
+          "Oore-ofe l’o ko mi beru,",
+          "Oore-ofe l’o gba mi;",
+          "Bi oore-ofe se yo to,",
+          "Nigba mo ko gbagbo!"
+        ]
+      }
+    ],
+    "category": "Grace and Salvation",
+    "tune_code": "C.M."
+  },
+  {
+    "id": 10,
+    "title_en": "To God Be the Glory",
+    "title_yo": "Fun Olorun L’ogo Wa",
+    "first_line_en": "To God be the glory, great things He hath done",
+    "first_line_yo": "F’Olorun l’ogo, ohun nla t’O se",
+    "lyrics_en": [
+        {
+            "type": "stanza",
+            "lines": [
+                "To God be the glory, great things He hath done,",
+                "So loved He the world that He gave us His Son,",
+                "Who yielded His life an atonement for sin,",
+                "And opened the life-gate that all may go in."
+            ]
+        },
+        {
+            "type": "chorus",
+            "lines": [
+                "Praise the Lord, praise the Lord,",
+                "Let the earth hear His voice!",
+                "Praise the Lord, praise the Lord,",
+                "Let the people rejoice!",
+                "O come to the Father, through Jesus the Son,",
+                "And give Him the glory, great things He hath done."
+            ]
+        }
+    ],
+    "lyrics_yo": [
+        {
+            "type": "stanza",
+            "lines": [
+                "F’Olorun l’ogo, ohun nla t’O se;",
+                "Torí O f’awa t’O f’Omo Re fun wa,",
+                "Eni t’O f’emí Re lé’lè f’esè wa,",
+                "T’O si silekun iye f’elere gbogbo."
+            ]
+        },
+        {
+            "type": "chorus",
+            "lines": [
+                "Yin Oluwa, yin Oluwa,",
+                "Je k’aiye gbo ohun Re!",
+                "Yin Oluwa, yin Oluwa,",
+                "Je k’eniyan yo!",
+                "O wa sodo Baba, nipa Jesu Omo,",
+                "Ki o si fun ni ogo, ohun nla t'O se."
+            ]
+        }
+    ],
+    "category": "Praise and Adoration",
+    "tune_code": "11.11.11.11. with Refrain"
+  }
+]
