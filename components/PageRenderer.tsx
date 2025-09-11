@@ -1,7 +1,7 @@
 import React, { useContext, useState, useMemo, useRef, useEffect } from 'react';
 import { AppContext } from '../contexts/AppContext';
 import { Hymn, Language, Page, Stanza } from '../types';
-import { ChevronLeftIcon, HeartIcon, PlayIcon, SearchIcon, ShareIcon, SunIcon, MoonIcon, TrashIcon, FilterIcon, XIcon, FontSizeIcon, ChevronDownIcon } from './Icons';
+import { ChevronLeftIcon, HeartIcon, PlayIcon, SearchIcon, ShareIcon, SunIcon, MoonIcon, TrashIcon, FilterIcon, XIcon, FontSizeIcon, ChevronDownIcon, HistoryIcon, FacebookIcon, TwitterIcon, InstagramIcon } from './Icons';
 import { Theme, FontSize } from '../types';
 
 
@@ -9,7 +9,7 @@ import { Theme, FontSize } from '../types';
 const HymnListItem: React.FC<{hymn: Hymn, onSelect: (hymn: Hymn) => void}> = ({hymn, onSelect}) => {
     const context = useContext(AppContext);
     if (!context) return null;
-    const { language, isFavorite } = context;
+    const { hymnLanguage, isFavorite } = context;
 
     return (
         <li
@@ -20,10 +20,10 @@ const HymnListItem: React.FC<{hymn: Hymn, onSelect: (hymn: Hymn) => void}> = ({h
                 <div className="text-lg font-bold text-primary-600 dark:text-primary-400 w-12 text-center">{hymn.id}</div>
                 <div className="ml-4">
                     <p className="font-semibold text-gray-800 dark:text-gray-200">
-                        {language === Language.ENGLISH ? hymn.title_en : hymn.title_yo}
+                        {hymnLanguage === Language.ENGLISH ? hymn.title_en : hymn.title_yo}
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {language === Language.ENGLISH ? hymn.first_line_en : hymn.first_line_yo}
+                        {hymnLanguage === Language.ENGLISH ? hymn.first_line_en : hymn.first_line_yo}
                     </p>
                 </div>
             </div>
@@ -37,11 +37,12 @@ const HymnDetail: React.FC<{hymn: Hymn}> = ({ hymn }) => {
     const context = useContext(AppContext);
     if (!context) return null;
     // Destructure context values
-    const { language, setLanguage, fontSize, setFontSize, isPro, isFavorite, toggleFavorite, setActivePage, addToHistory } = context;
+    const { appLanguage, hymnLanguage, setHymnLanguage, fontSize, setFontSize, isFavorite, toggleFavorite, setActivePage, addToHistory } = context;
 
     // State and ref for the new font size control popover
     const [isFontControlOpen, setIsFontControlOpen] = useState(false);
     const fontControlRef = useRef<HTMLDivElement>(null);
+    
 
     // Effect to close the font size popover when clicking outside of it
     useEffect(() => {
@@ -56,8 +57,8 @@ const HymnDetail: React.FC<{hymn: Hymn}> = ({ hymn }) => {
         };
     }, []);
 
-    // Determine which lyrics to display based on the current language context.
-    const lyrics = language === Language.ENGLISH ? hymn.lyrics_en : hymn.lyrics_yo;
+    // Determine which lyrics to display based on the current hymn language context.
+    const lyrics = hymnLanguage === Language.ENGLISH ? hymn.lyrics_en : hymn.lyrics_yo;
 
     // Check if lyrics are available for the selected language to handle missing translations.
     const lyricsAvailable = lyrics && lyrics.length > 0;
@@ -71,7 +72,7 @@ const HymnDetail: React.FC<{hymn: Hymn}> = ({ hymn }) => {
 
     // Share functionality to copy hymn text to clipboard or use native share API
     const handleShare = async () => {
-        const title = language === Language.ENGLISH ? hymn.title_en : hymn.title_yo;
+        const title = hymnLanguage === Language.ENGLISH ? hymn.title_en : hymn.title_yo;
         const textToShare = `${title}\n\n${lyrics.map(stanza => stanza.lines.join('\n')).join('\n\n')}`;
 
         if(navigator.share) {
@@ -93,13 +94,13 @@ const HymnDetail: React.FC<{hymn: Hymn}> = ({ hymn }) => {
             {/* Back button to return to the hymn library */}
             <button onClick={() => setActivePage(Page.HymnLibrary)} className="flex items-center mb-4 text-primary-600 dark:text-primary-400 hover:underline">
                 <ChevronLeftIcon className="w-5 h-5 mr-1" />
-                {language === Language.ENGLISH ? 'Back to Library' : 'Padà sí Àkójọpọ̀'}
+                {appLanguage === Language.ENGLISH ? 'Back to Library' : 'Padà sí Àkójọpọ̀'}
             </button>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
                 <div className="flex justify-between items-start mb-4">
                     <div>
                         <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-                            {hymn.id}. {language === Language.ENGLISH ? hymn.title_en : hymn.title_yo}
+                            {hymn.id}. {hymnLanguage === Language.ENGLISH ? hymn.title_en : hymn.title_yo}
                         </h2>
                         <p className="text-md text-gray-500 dark:text-gray-400">{hymn.category} | {hymn.tune_code}</p>
                     </div>
@@ -111,7 +112,7 @@ const HymnDetail: React.FC<{hymn: Hymn}> = ({ hymn }) => {
                             </button>
                             {isFontControlOpen && (
                                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border dark:border-gray-700 z-10 p-2">
-                                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 px-2 py-1">{language === Language.ENGLISH ? 'Font Size' : 'Ìwọ̀n Lẹ́tà'}</p>
+                                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 px-2 py-1">{appLanguage === Language.ENGLISH ? 'Font Size' : 'Ìwọ̀n Lẹ́tà'}</p>
                                     <div className="flex items-center justify-around mt-2">
                                         <button 
                                           onClick={() => { setFontSize(FontSize.SMALL); setIsFontControlOpen(false); }} 
@@ -152,36 +153,27 @@ const HymnDetail: React.FC<{hymn: Hymn}> = ({ hymn }) => {
                 {/* Language Toggle: Allows switching between English and Yoruba lyrics */}
                 <div className="flex space-x-2 border border-gray-300 dark:border-gray-600 rounded-full p-1 w-fit mb-6">
                     <button 
-                        onClick={() => setLanguage(Language.ENGLISH)}
-                        className={`px-4 py-1 rounded-full text-sm font-semibold transition-colors ${language === Language.ENGLISH ? 'bg-primary-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
-                        aria-pressed={language === Language.ENGLISH}
+                        onClick={() => setHymnLanguage(Language.ENGLISH)}
+                        className={`px-4 py-1 rounded-full text-sm font-semibold transition-colors ${hymnLanguage === Language.ENGLISH ? 'bg-primary-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                        aria-pressed={hymnLanguage === Language.ENGLISH}
                     >
                         English
                     </button>
                     <button 
-                        onClick={() => setLanguage(Language.YORUBA)}
-                        className={`px-4 py-1 rounded-full text-sm font-semibold transition-colors ${language === Language.YORUBA ? 'bg-primary-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
-                        aria-pressed={language === Language.YORUBA}
+                        onClick={() => setHymnLanguage(Language.YORUBA)}
+                        className={`px-4 py-1 rounded-full text-sm font-semibold transition-colors ${hymnLanguage === Language.YORUBA ? 'bg-primary-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                        aria-pressed={hymnLanguage === Language.YORUBA}
                     >
                         Yorùbá
                     </button>
                 </div>
-
-                 {isPro && (
-                    <div className="mb-6">
-                        <button className="flex items-center justify-center w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
-                            <PlayIcon className="w-5 h-5 mr-2"/>
-                            {language === Language.ENGLISH ? 'Play Audio (Pro)' : 'Gbọ́ Orin (Pro)'}
-                        </button>
-                    </div>
-                )}
                 
                 {/* Lyrics Display: Conditionally renders lyrics or a "not available" message */}
                 <div className={`lyrics leading-relaxed ${fontSizes[fontSize]}`}>
                     {lyricsAvailable ? (
                         lyrics.map((stanza: Stanza, index: number) => (
                             <div key={index} className="mb-6">
-                                {stanza.type === 'chorus' && <p className="font-bold italic mb-2">{language === Language.ENGLISH ? 'Chorus' : 'Egbe'}</p>}
+                                {stanza.type === 'chorus' && <p className="font-bold italic mb-2">{hymnLanguage === Language.ENGLISH ? 'Chorus' : 'Egbe'}</p>}
                                 {stanza.lines.map((line, lineIndex) => (
                                     <p key={lineIndex}>{line}</p>
                                 ))}
@@ -189,7 +181,7 @@ const HymnDetail: React.FC<{hymn: Hymn}> = ({ hymn }) => {
                         ))
                     ) : (
                         <p className="text-gray-500 dark:text-gray-400 italic">
-                            {language === Language.ENGLISH 
+                            {hymnLanguage === Language.ENGLISH 
                                 ? 'Lyrics not available in English.' 
                                 : 'Àkọlé orin kò sí ní èdè Yorùbá.'}
                         </p>
@@ -202,25 +194,6 @@ const HymnDetail: React.FC<{hymn: Hymn}> = ({ hymn }) => {
 
 
 // Pages
-const HomePage = () => {
-    const context = useContext(AppContext);
-    if (!context) return null;
-    const { setActivePage, hymns, language } = context;
-
-    return (
-        <div className="text-center">
-            <h1 className="text-4xl font-bold text-primary-600 dark:text-primary-400 mb-4">{language === Language.ENGLISH ? 'Welcome to the Digital Hymn Book' : 'Ẹ kú àbọ̀ sí Ìwé Orin Oní Dìjítà'}</h1>
-            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">{language === Language.ENGLISH ? 'Your companion for worship and praise.' : 'Alábàápín rẹ fún ìjọsìn àti ìyìn.'}</p>
-            <button onClick={() => setActivePage(Page.HymnLibrary)} className="px-8 py-3 bg-primary-600 text-white font-semibold rounded-lg shadow-md hover:bg-primary-700 transition-colors">
-                {language === Language.ENGLISH ? 'Browse Hymns' : 'Ṣàwárí Àwọn Orin'}
-            </button>
-            <div className="mt-12">
-                <h2 className="text-2xl font-semibold mb-4">{language === Language.ENGLISH ? 'Featured Hymn' : 'Orin Àkànṣe'}</h2>
-                <HymnListItem hymn={hymns[0]} onSelect={(hymn) => setActivePage(Page.HymnDetail, { hymn })} />
-            </div>
-        </div>
-    );
-};
 
 // Collapsible category header for the 'Category' view mode
 const CategoryHeader: React.FC<{ category: string, count: number, isExpanded: boolean, onToggle: () => void, language: Language }> = ({ category, count, isExpanded, onToggle, language }) => (
@@ -235,15 +208,52 @@ const CategoryHeader: React.FC<{ category: string, count: number, isExpanded: bo
     </button>
 );
 
+const EmptyState: React.FC<{ searchTerm: string }> = ({ searchTerm }) => {
+    const context = useContext(AppContext);
+    if (!context) return null;
+    const { appLanguage } = context;
+
+    return (
+        <div className="text-center text-gray-500 dark:text-gray-400 mt-8 px-4 py-12">
+            <SearchIcon className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                 {searchTerm 
+                    ? (appLanguage === 'en' ? 'No Results Found' : 'Kò Rí Àbájáde Kankan')
+                    : (appLanguage === 'en' ? 'No Hymns to Display' : 'Kò Sí Orin Láti Fi Hàn')
+                 }
+            </h3>
+            <p>
+                {searchTerm
+                    ? (
+                        <>
+                            {appLanguage === 'en' 
+                                ? `We couldn't find any hymns matching ` 
+                                : `A kò rí orin kankan tó bámu `
+                            }
+                            <span className="font-semibold text-gray-700 dark:text-gray-300">"{searchTerm}"</span>.
+                            <br />
+                            {appLanguage === 'en' ? 'Try searching for something else.' : 'Gbìyànjú wá nǹkan mìíràn.'}
+                        </>
+                    )
+                    : (
+                        appLanguage === 'en' ? 'There are no hymns matching your current filters.' : 'Kò sí orin kankan tó bá àwọn asẹ́ rẹ mu.'
+                    )
+                }
+            </p>
+        </div>
+    );
+};
+
 
 const HymnLibraryPage = () => {
     const context = useContext(AppContext);
     if (!context) return null;
-    const { hymns, language, setActivePage, addToHistory } = context;
+    const { hymns, appLanguage, hymnLanguage, setHymnLanguage, setActivePage, addToHistory, recentSearches, addRecentSearch, clearRecentSearches } = context;
     
     // State for all UI interactions
     const [searchTerm, setSearchTerm] = useState('');
     const [isSearchActive, setIsSearchActive] = useState(false);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
     const [isFabOpen, setIsFabOpen] = useState(false);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
     const [activeFilter, setActiveFilter] = useState<{ type: 'none' | 'chorus' | 'category', value?: string }>({ type: 'none' });
@@ -265,17 +275,64 @@ const HymnLibraryPage = () => {
     const processedHymns = useMemo(() => {
         let hymnsToProcess = [...hymns];
 
-        // 1. Search Filter
+        // 1. Search Filter (with scoring and ranking)
         if (searchTerm) {
             const lowerCaseSearch = searchTerm.toLowerCase();
-            hymnsToProcess = hymnsToProcess.filter(hymn =>
-                hymn.id.toString().includes(lowerCaseSearch) ||
-                (language === Language.ENGLISH ? hymn.title_en : hymn.title_yo).toLowerCase().includes(lowerCaseSearch) ||
-                (language === Language.ENGLISH ? hymn.first_line_en : hymn.first_line_yo).toLowerCase().includes(lowerCaseSearch) ||
-                hymn.category.toLowerCase().includes(lowerCaseSearch) ||
-                hymn.tune_code.toLowerCase().includes(lowerCaseSearch) ||
-                (language === Language.ENGLISH ? hymn.lyrics_en : hymn.lyrics_yo).some(stanza => stanza.lines.some(line => line.toLowerCase().includes(lowerCaseSearch)))
-            );
+
+            const calculateScore = (hymn: Hymn) => {
+                let score = 0;
+                const title = hymnLanguage === Language.ENGLISH ? hymn.title_en : hymn.title_yo;
+                const firstLine = hymnLanguage === Language.ENGLISH ? hymn.first_line_en : hymn.first_line_yo;
+                const lyrics = hymnLanguage === Language.ENGLISH ? hymn.lyrics_en : hymn.lyrics_yo;
+
+                // ID match (high score)
+                if (hymn.id.toString().includes(lowerCaseSearch)) {
+                    score += 50;
+                    if (hymn.id.toString() === lowerCaseSearch) {
+                        score += 50; // Bonus for exact match
+                    }
+                }
+
+                // Title match
+                if (title.toLowerCase().includes(lowerCaseSearch)) {
+                    score += 40;
+                    if (title.toLowerCase().startsWith(lowerCaseSearch)) {
+                        score += 10; // Bonus for starting with term
+                    }
+                }
+                
+                // First line match
+                if (firstLine.toLowerCase().includes(lowerCaseSearch)) {
+                    score += 20;
+                    if (firstLine.toLowerCase().startsWith(lowerCaseSearch)) {
+                        score += 10; // Bonus
+                    }
+                }
+
+                // Tune code match (fuzzy)
+                if (hymn.tune_code.toLowerCase().replace(/[. ]/g, '').includes(lowerCaseSearch.replace(/[. ]/g, ''))) {
+                    score += 15;
+                }
+
+                // Category match
+                if (hymn.category.toLowerCase().includes(lowerCaseSearch)) {
+                    score += 10;
+                }
+
+                // Lyrics match
+                if (lyrics.some(stanza => stanza.lines.some(line => line.toLowerCase().includes(lowerCaseSearch)))) {
+                    score += 5;
+                }
+                
+                return score;
+            };
+
+            hymnsToProcess = hymnsToProcess
+                .map(hymn => ({ hymn, score: calculateScore(hymn) }))
+                .filter(item => item.score > 0)
+                .sort((a, b) => b.score - a.score)
+                .map(item => item.hymn);
+
         }
 
         // 2. Active Filter (Category or Chorus)
@@ -283,20 +340,23 @@ const HymnLibraryPage = () => {
             hymnsToProcess = hymnsToProcess.filter(hymn => hymn.category === activeFilter.value);
         } else if (activeFilter.type === 'chorus') {
             hymnsToProcess = hymnsToProcess.filter(hymn => 
-                (language === Language.ENGLISH ? hymn.lyrics_en : hymn.lyrics_yo).some(s => s.type === 'chorus')
+                (hymnLanguage === Language.ENGLISH ? hymn.lyrics_en : hymn.lyrics_yo).some(s => s.type === 'chorus')
             );
         }
 
-        // 3. Sorting based on View Mode
-        hymnsToProcess.sort((a, b) => {
-            if (viewMode === 'list_title') {
-                return (language === Language.ENGLISH ? a.title_en : a.title_yo).localeCompare(language === Language.ENGLISH ? b.title_en : b.title_yo);
-            }
-            return a.id - b.id; // Default sort by number for 'list_number' and 'category' views
-        });
+        // 3. Sorting based on View Mode (only if no search term)
+        if (!searchTerm) {
+            hymnsToProcess.sort((a, b) => {
+                if (viewMode === 'list_title') {
+                    return (hymnLanguage === Language.ENGLISH ? a.title_en : a.title_yo).localeCompare(hymnLanguage === Language.ENGLISH ? b.title_en : b.title_yo);
+                }
+                return a.id - b.id; // Default sort by number for 'list_number' and 'category' views
+            });
+        }
 
         return hymnsToProcess;
-    }, [hymns, searchTerm, language, activeFilter, viewMode]);
+    }, [hymns, searchTerm, hymnLanguage, activeFilter, viewMode]);
+
 
     // Group hymns for category view
     const groupedHymns = useMemo(() => {
@@ -329,25 +389,100 @@ const HymnLibraryPage = () => {
         setIsFabOpen(false);
     };
 
+    const handleSearchSubmit = () => {
+        const term = searchTerm.trim();
+        if (term) {
+            addRecentSearch(term);
+            searchInputRef.current?.blur();
+        }
+    };
+
+    const handleRecentSearchClick = (search: string) => {
+        setSearchTerm(search);
+        addRecentSearch(search); // This moves it to the top of recents
+        setIsSearchFocused(false);
+    };
+
     const FabMenuItem: React.FC<{onClick: () => void, children: React.ReactNode}> = ({ onClick, children }) => (
          <button onClick={onClick} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md">{children}</button>
     );
     
     return (
         <div className="relative min-h-full">
-            {isSearchActive && (
+            {isSearchActive ? (
                 <div className="relative mb-6">
                     <input
                         ref={searchInputRef}
                         type="text"
-                        placeholder={language === Language.ENGLISH ? 'Search by title, number, lyrics...' : 'Ṣàwárí pẹ̀lú àkọlé, nọ́mbà...'}
+                        placeholder={appLanguage === Language.ENGLISH ? 'Search by title, number, lyrics...' : 'Ṣàwárí pẹ̀lú àkọlé, nọ́mbà...'}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
+                        onFocus={() => setIsSearchFocused(true)}
+                        onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                handleSearchSubmit();
+                            }
+                        }}
                         className="w-full pl-10 pr-10 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500"
                     />
                     <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <button onClick={() => { setIsSearchActive(false); setSearchTerm(''); }} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                        <XIcon className="w-5 h-5" />
+                    </button>
+                    {isSearchFocused && searchTerm.length === 0 && recentSearches.length > 0 && (
+                        <div className="absolute top-full mt-2 w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border dark:border-gray-700 z-10 py-2">
+                             <div className="flex justify-between items-center px-4 pb-2 mb-2 border-b dark:border-gray-600">
+                                <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400">
+                                    {appLanguage === 'en' ? 'Recent Searches' : 'Àwọn Ìwárí Àìpẹ́'}
+                                </h4>
+                                <button
+                                    onClick={clearRecentSearches}
+                                    className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+                                >
+                                    {appLanguage === 'en' ? 'Clear' : 'Paarẹ́'}
+                                </button>
+                            </div>
+                            <ul className="max-h-60 overflow-y-auto">
+                                {recentSearches.map((search, index) => (
+                                    <li key={index}>
+                                        <button
+                                            className="w-full text-left px-4 py-2 flex items-center text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                            onClick={() => handleRecentSearchClick(search)}
+                                        >
+                                            <HistoryIcon className="w-4 h-4 mr-3 text-gray-400"/>
+                                            {search}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+            ) : (
+                <div className="flex justify-center items-center mb-4 space-x-4">
+                    <div className="flex space-x-1 border border-gray-300 dark:border-gray-600 rounded-full p-1 w-fit">
+                        <button 
+                            onClick={() => setHymnLanguage(Language.YORUBA)}
+                            className={`px-4 py-1 rounded-full text-sm font-semibold transition-colors ${hymnLanguage === Language.YORUBA ? 'bg-primary-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                            aria-pressed={hymnLanguage === Language.YORUBA}
+                        >
+                            Yorùbá
+                        </button>
+                        <button 
+                            onClick={() => setHymnLanguage(Language.ENGLISH)}
+                            className={`px-4 py-1 rounded-full text-sm font-semibold transition-colors ${hymnLanguage === Language.ENGLISH ? 'bg-primary-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                            aria-pressed={hymnLanguage === Language.ENGLISH}
+                        >
+                            English
+                        </button>
+                    </div>
+                     <button 
+                        onClick={() => setIsSearchActive(true)}
+                        className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:ring-offset-gray-800 focus:ring-primary-500"
+                        aria-label={appLanguage === 'en' ? 'Search Hymns' : 'Ṣàwárí Orin'}
+                    >
+                        <SearchIcon className="w-6 h-6 text-gray-600 dark:text-gray-400" />
                     </button>
                 </div>
             )}
@@ -355,7 +490,7 @@ const HymnLibraryPage = () => {
             {activeFilter.type !== 'none' && (
                  <div className="mb-4">
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 dark:bg-primary-900 text-primary-800 dark:text-primary-200">
-                        {activeFilter.type === 'category' ? `${language === 'en' ? 'Category' : 'Ẹ̀ka'}: ${activeFilter.value}` : `${language === 'en' ? 'Has Chorus' : 'Pẹ̀lú Egbe'}`}
+                        {activeFilter.type === 'category' ? `${appLanguage === 'en' ? 'Category' : 'Ẹ̀ka'}: ${activeFilter.value}` : `${appLanguage === 'en' ? 'Has Chorus' : 'Pẹ̀lú Egbe'}`}
                         <button onClick={() => setActiveFilter({type: 'none'})} className="ml-2 -mr-1 p-0.5 rounded-full text-primary-600 dark:text-primary-200 hover:bg-primary-200 dark:hover:bg-primary-700">
                             <XIcon className="w-3 h-3" />
                         </button>
@@ -365,29 +500,33 @@ const HymnLibraryPage = () => {
 
             {viewMode === 'category' && groupedHymns ? (
                 <div className="space-y-3 pb-20">
-                    {Object.entries(groupedHymns).map(([category, hymnsInCategory]) => (
-                        <div key={category} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-                            <CategoryHeader 
-                                category={category}
-                                count={hymnsInCategory.length}
-                                isExpanded={expandedCategories.has(category)}
-                                onToggle={() => toggleCategory(category)}
-                                language={language}
-                            />
-                            {expandedCategories.has(category) && (
-                                <ul className="p-2 space-y-2">
-                                    {hymnsInCategory.map(hymn => <HymnListItem key={hymn.id} hymn={hymn} onSelect={handleSelectHymn} />)}
-                                </ul>
-                            )}
-                        </div>
-                    ))}
+                    {Object.keys(groupedHymns).length > 0 ? (
+                        Object.entries(groupedHymns).map(([category, hymnsInCategory]) => (
+                            <div key={category} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                                <CategoryHeader 
+                                    category={category}
+                                    count={hymnsInCategory.length}
+                                    isExpanded={expandedCategories.has(category)}
+                                    onToggle={() => toggleCategory(category)}
+                                    language={appLanguage}
+                                />
+                                {expandedCategories.has(category) && (
+                                    <ul className="p-2 space-y-2">
+                                        {hymnsInCategory.map(hymn => <HymnListItem key={hymn.id} hymn={hymn} onSelect={handleSelectHymn} />)}
+                                    </ul>
+                                )}
+                            </div>
+                        ))
+                    ) : (
+                        <EmptyState searchTerm={searchTerm} />
+                    )}
                 </div>
             ) : (
                 <ul className="space-y-3 pb-20">
                     {processedHymns.length > 0 ? (
                         processedHymns.map(hymn => <HymnListItem key={hymn.id} hymn={hymn} onSelect={handleSelectHymn} />)
                     ) : (
-                         <p className="text-center text-gray-500 dark:text-gray-400 mt-8">{language === 'en' ? 'No hymns found.' : 'Kò sí orin kankan.'}</p>
+                        <EmptyState searchTerm={searchTerm} />
                     )}
                 </ul>
             )}
@@ -395,28 +534,21 @@ const HymnLibraryPage = () => {
             <div className="fixed bottom-6 right-6 z-20 flex flex-col items-end">
                 {isFabOpen && (
                      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-2 mb-2 w-56 border dark:border-gray-700">
-                        <FabMenuItem onClick={() => { setIsSearchActive(true); setIsFabOpen(false); }}>
-                            <div className="flex items-center">
-                                <SearchIcon className="w-5 h-5 mr-3 text-gray-500 dark:text-gray-400" />
-                                <span>{language === 'en' ? 'Search Hymns' : 'Ṣàwárí Orin'}</span>
-                            </div>
-                        </FabMenuItem>
+                        <div className="px-2 py-1 text-xs font-semibold text-gray-400">{appLanguage === 'en' ? 'View By' : 'Wo Nípa'}</div>
+                        <FabMenuItem onClick={() => { setViewMode('list_number'); setIsFabOpen(false); }}>{appLanguage === 'en' ? 'List (by Number)' : 'Àkójọ (nípa Nọ́mbà)'}</FabMenuItem>
+                        <FabMenuItem onClick={() => { setViewMode('list_title'); setIsFabOpen(false); }}>{appLanguage === 'en' ? 'List (by Title)' : 'Àkójọ (nípa Àkọlé)'}</FabMenuItem>
+                        <FabMenuItem onClick={() => { setViewMode('category'); setIsFabOpen(false); }}>{appLanguage === 'en' ? 'Category' : 'Ẹ̀ka'}</FabMenuItem>
                         <div className="border-t my-1 dark:border-gray-700"></div>
-                        <div className="px-2 py-1 text-xs font-semibold text-gray-400">{language === 'en' ? 'View By' : 'Wo Nípa'}</div>
-                        <FabMenuItem onClick={() => { setViewMode('list_number'); setIsFabOpen(false); }}>{language === 'en' ? 'List (by Number)' : 'Àkójọ (nípa Nọ́mbà)'}</FabMenuItem>
-                        <FabMenuItem onClick={() => { setViewMode('list_title'); setIsFabOpen(false); }}>{language === 'en' ? 'List (by Title)' : 'Àkójọ (nípa Àkọlé)'}</FabMenuItem>
-                        <FabMenuItem onClick={() => { setViewMode('category'); setIsFabOpen(false); }}>{language === 'en' ? 'Category' : 'Ẹ̀ka'}</FabMenuItem>
-                        <div className="border-t my-1 dark:border-gray-700"></div>
-                        <div className="px-2 py-1 text-xs font-semibold text-gray-400">{language === 'en' ? 'Filter By' : 'Sẹ́ Nípa'}</div>
-                        <FabMenuItem onClick={() => setIsCategoryModalOpen(true)}>{language === 'en' ? 'Category' : 'Ẹ̀ka'}</FabMenuItem>
-                        <FabMenuItem onClick={() => { setActiveFilter({type: 'chorus'}); setIsFabOpen(false); }}>{language === 'en' ? 'With Chorus' : 'Pẹ̀lú Egbe'}</FabMenuItem>
-                        <FabMenuItem onClick={() => { setActiveFilter({type: 'none'}); setIsFabOpen(false); }}>{language === 'en' ? 'Show All' : 'Fi Gbogbo Rẹ̀ Hàn'}</FabMenuItem>
+                        <div className="px-2 py-1 text-xs font-semibold text-gray-400">{appLanguage === 'en' ? 'Filter By' : 'Sẹ́ Nípa'}</div>
+                        <FabMenuItem onClick={() => setIsCategoryModalOpen(true)}>{appLanguage === 'en' ? 'Category' : 'Ẹ̀ka'}</FabMenuItem>
+                        <FabMenuItem onClick={() => { setActiveFilter({type: 'chorus'}); setIsFabOpen(false); }}>{appLanguage === 'en' ? 'With Chorus' : 'Pẹ̀lú Egbe'}</FabMenuItem>
+                        <FabMenuItem onClick={() => { setActiveFilter({type: 'none'}); setIsFabOpen(false); }}>{appLanguage === 'en' ? 'Show All' : 'Fi Gbogbo Rẹ̀ Hàn'}</FabMenuItem>
                      </div>
                 )}
                 <button
                     onClick={() => setIsFabOpen(!isFabOpen)}
                     className="p-4 bg-primary-600 text-white rounded-full shadow-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-transform transform hover:scale-105"
-                    aria-label={language === 'en' ? 'View and filter options' : 'Àwọn àṣàyàn wíwò àti sísẹ́'}
+                    aria-label={appLanguage === 'en' ? 'View and filter options' : 'Àwọn àṣàyàn wíwò àti sísẹ́'}
                 >
                     {isFabOpen ? <XIcon className="w-6 h-6" /> : <FilterIcon className="w-6 h-6" />}
                 </button>
@@ -426,7 +558,7 @@ const HymnLibraryPage = () => {
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-30 flex justify-center items-center p-4">
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md max-h-[80vh] flex flex-col">
                         <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center">
-                            <h3 className="text-xl font-semibold">{language === 'en' ? 'Select a Category' : 'Yan Ẹ̀ka Kan'}</h3>
+                            <h3 className="text-xl font-semibold">{appLanguage === 'en' ? 'Select a Category' : 'Yan Ẹ̀ka Kan'}</h3>
                             <button onClick={() => setIsCategoryModalOpen(false)} className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
                                 <XIcon className="w-5 h-5" />
                             </button>
@@ -450,7 +582,7 @@ const HymnLibraryPage = () => {
 const FavoritesPage = () => {
     const context = useContext(AppContext);
     if (!context) return null;
-    const { hymns, favorites, language, setActivePage, addToHistory } = context;
+    const { hymns, favorites, appLanguage, setActivePage, addToHistory } = context;
     
     const favoriteHymns = useMemo(() => hymns.filter(hymn => favorites.includes(hymn.id)), [hymns, favorites]);
     
@@ -461,13 +593,13 @@ const FavoritesPage = () => {
 
     return (
         <div>
-            <h2 className="text-2xl font-bold mb-4">{language === Language.ENGLISH ? 'Favorite Hymns' : 'Àwọn Orin Ayànfẹ́'}</h2>
+            <h2 className="text-2xl font-bold mb-4">{appLanguage === Language.ENGLISH ? 'Favorite Hymns' : 'Àwọn Orin Ayànfẹ́'}</h2>
             {favoriteHymns.length > 0 ? (
                 <ul className="space-y-3">
                     {favoriteHymns.map(hymn => <HymnListItem key={hymn.id} hymn={hymn} onSelect={handleSelectHymn} />)}
                 </ul>
             ) : (
-                <p className="text-gray-500 dark:text-gray-400">{language === Language.ENGLISH ? 'You have no favorite hymns yet.' : 'O kò tíì ní orin ayànfẹ́ kankan.'}</p>
+                <p className="text-gray-500 dark:text-gray-400">{appLanguage === Language.ENGLISH ? 'You have no favorite hymns yet.' : 'O kò tíì ní orin ayànfẹ́ kankan.'}</p>
             )}
         </div>
     );
@@ -476,7 +608,7 @@ const FavoritesPage = () => {
 const HistoryPage = () => {
     const context = useContext(AppContext);
     if (!context) return null;
-    const { hymns, history, language, setActivePage, addToHistory } = context;
+    const { hymns, history, appLanguage, setActivePage, addToHistory } = context;
 
     const historyHymns = useMemo(() => history.map(id => hymns.find(h => h.id === id)).filter(Boolean) as Hymn[], [history, hymns]);
     
@@ -487,13 +619,13 @@ const HistoryPage = () => {
 
     return (
         <div>
-            <h2 className="text-2xl font-bold mb-4">{language === Language.ENGLISH ? 'Recently Viewed' : 'Àwọn Tí O Wò Láìpẹ́'}</h2>
+            <h2 className="text-2xl font-bold mb-4">{appLanguage === Language.ENGLISH ? 'Recently Viewed' : 'Àwọn Tí O Wò Láìpẹ́'}</h2>
             {historyHymns.length > 0 ? (
                 <ul className="space-y-3">
                     {historyHymns.map(hymn => <HymnListItem key={`hist-${hymn.id}`} hymn={hymn} onSelect={handleSelectHymn} />)}
                 </ul>
             ) : (
-                <p className="text-gray-500 dark:text-gray-400">{language === Language.ENGLISH ? 'Your viewing history is empty.' : 'Ìtàn wíwò rẹ òfìfo ni.'}</p>
+                <p className="text-gray-500 dark:text-gray-400">{appLanguage === Language.ENGLISH ? 'Your viewing history is empty.' : 'Ìtàn wíwò rẹ òfìfo ni.'}</p>
             )}
         </div>
     );
@@ -502,21 +634,21 @@ const HistoryPage = () => {
 const DoctrinePage = () => {
     const context = useContext(AppContext);
     if (!context) return null;
-    const { language } = context;
+    const { appLanguage } = context;
 
     return (
         <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <h2 className="text-3xl font-bold mb-4">{language === 'en' ? 'Our Doctrine' : 'Ẹ̀kọ́ Wa'}</h2>
-            <p className="mb-4">{language === 'en' ? 'Here you can read about the core beliefs and doctrines of our church. These principles guide our worship, our community, and our daily lives.' : 'Níhìn-ín, o lè ka nípa àwọn ìgbàgbọ́ àti ẹ̀kọ́ ìjọ wa. Àwọn ìlànà wọ̀nyí ni ó ń darí ìjọsìn wa, àwùjọ wa, àti ìgbésí ayé wa ojoojúmọ́.'}</p>
+            <h2 className="text-3xl font-bold mb-4">{appLanguage === 'en' ? 'Our Doctrine' : 'Ẹ̀kọ́ Wa'}</h2>
+            <p className="mb-4">{appLanguage === 'en' ? 'Here you can read about the core beliefs and doctrines of our church. These principles guide our worship, our community, and our daily lives.' : 'Níhìn-ín, o lè ka nípa àwọn ìgbàgbọ́ àti ẹ̀kọ́ ìjọ wa. Àwọn ìlànà wọ̀nyí ni ó ń darí ìjọsìn wa, àwùjọ wa, àti ìgbésí ayé wa ojoojúmọ́.'}</p>
             <div className="space-y-2 mb-8">
-                <p><strong>{language === 'en' ? '1. The Holy Scriptures' : '1. Ìwé Mímọ́'}</strong></p>
-                <p><strong>{language === 'en' ? '2. The Godhead' : '2. Mẹ́talọ́kan'}</strong></p>
-                <p><strong>{language === 'en' ? '3. Man, His Fall and Redemption' : '3. Ènìyàn, Ìṣubú àti Ìràpadà Rẹ̀'}</strong></p>
+                <p><strong>{appLanguage === 'en' ? '1. The Holy Scriptures' : '1. Ìwé Mímọ́'}</strong></p>
+                <p><strong>{appLanguage === 'en' ? '2. The Godhead' : '2. Mẹ́talọ́kan'}</strong></p>
+                <p><strong>{appLanguage === 'en' ? '3. Man, His Fall and Redemption' : '3. Ènìyàn, Ìṣubú àti Ìràpadà Rẹ̀'}</strong></p>
             </div>
-            <h3 className="text-2xl font-bold mb-4">{language === 'en' ? 'Find a Branch' : 'Wá Ẹ̀ka Ìjọ'}</h3>
+            <h3 className="text-2xl font-bold mb-4">{appLanguage === 'en' ? 'Find a Branch' : 'Wá Ẹ̀ka Ìjọ'}</h3>
             <div className="flex flex-col sm:flex-row gap-4">
-                <input type="text" placeholder={language === 'en' ? "Enter your city or zip code" : "Tẹ ìlú tàbí koodu ìfìwéránṣẹ́"} className="flex-grow p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
-                <button className="px-6 py-2 bg-primary-600 text-white font-semibold rounded-md hover:bg-primary-700">{language === 'en' ? 'Search' : 'Wáà'}</button>
+                <input type="text" placeholder={appLanguage === 'en' ? "Enter your city or zip code" : "Tẹ ìlú tàbí koodu ìfìwéránṣẹ́"} className="flex-grow p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
+                <button className="px-6 py-2 bg-primary-600 text-white font-semibold rounded-md hover:bg-primary-700">{appLanguage === 'en' ? 'Search' : 'Wáà'}</button>
             </div>
         </div>
     );
@@ -525,42 +657,95 @@ const DoctrinePage = () => {
 const SettingsPage = () => {
     const context = useContext(AppContext);
     if (!context) return null;
-    const { language, setLanguage, theme, setTheme, fontSize, setFontSize, isPro, setIsPro } = context;
+    const { appLanguage, setAppLanguage, theme, setTheme, fontSize, setFontSize, defaultHymnLanguage, setDefaultHymnLanguage } = context;
 
-    const SettingRow: React.FC<{label: string, children: React.ReactNode}> = ({label, children}) => (
-        <div className="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
-            <span className="text-lg">{label}</span>
-            <div>{children}</div>
+    const SettingRow: React.FC<{label: string, description: string, children: React.ReactNode}> = ({label, description, children}) => (
+        <div className="py-4 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
+            <div className="flex items-center justify-between">
+                <span className="text-lg">{label}</span>
+                <div>{children}</div>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 pr-8">{description}</p>
         </div>
     );
 
     return (
         <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <h2 className="text-3xl font-bold mb-6">{language === 'en' ? 'Settings' : 'Ètò'}</h2>
-            <SettingRow label={language === 'en' ? 'Language' : 'Èdè'}>
+            <h2 className="text-3xl font-bold mb-6">{appLanguage === 'en' ? 'Settings' : 'Ètò'}</h2>
+            
+            <SettingRow 
+                label={appLanguage === 'en' ? 'App Language' : 'Èdè Ìṣàfilọ́lẹ̀'} 
+                description={appLanguage === 'en' ? 'Change the language for the app interface.' : 'Yí èdè ìṣàfilọ́lẹ̀ ohun èlò náà padà.'}
+            >
                 <div className="flex space-x-2">
-                    <button onClick={() => setLanguage(Language.ENGLISH)} className={`px-4 py-1 rounded-full ${language === Language.ENGLISH ? 'bg-primary-600 text-white' : 'bg-gray-200 dark:bg-gray-600'}`}>English</button>
-                    <button onClick={() => setLanguage(Language.YORUBA)} className={`px-4 py-1 rounded-full ${language === Language.YORUBA ? 'bg-primary-600 text-white' : 'bg-gray-200 dark:bg-gray-600'}`}>Yorùbá</button>
+                    <button onClick={() => setAppLanguage(Language.ENGLISH)} className={`px-4 py-1 rounded-full ${appLanguage === Language.ENGLISH ? 'bg-primary-600 text-white' : 'bg-gray-200 dark:bg-gray-600'}`}>English</button>
+                    <button onClick={() => setAppLanguage(Language.YORUBA)} className={`px-4 py-1 rounded-full ${appLanguage === Language.YORUBA ? 'bg-primary-600 text-white' : 'bg-gray-200 dark:bg-gray-600'}`}>Yorùbá</button>
                 </div>
             </SettingRow>
-            <SettingRow label={language === 'en' ? 'Theme' : 'Àwọ̀'}>
+
+            <SettingRow 
+                label={appLanguage === 'en' ? 'Default Hymn Language' : 'Èdè Orin Àkọ́kọ́'}
+                description={appLanguage === 'en' ? 'Choose the default language for viewing hymns.' : 'Yan èdè àkọ́kọ́ fún wíwo àwọn orin.'}
+            >
+                <div className="flex space-x-2">
+                    <button onClick={() => setDefaultHymnLanguage(Language.ENGLISH)} className={`px-4 py-1 rounded-full ${defaultHymnLanguage === Language.ENGLISH ? 'bg-primary-600 text-white' : 'bg-gray-200 dark:bg-gray-600'}`}>English</button>
+                    <button onClick={() => setDefaultHymnLanguage(Language.YORUBA)} className={`px-4 py-1 rounded-full ${defaultHymnLanguage === Language.YORUBA ? 'bg-primary-600 text-white' : 'bg-gray-200 dark:bg-gray-600'}`}>Yorùbá</button>
+                </div>
+            </SettingRow>
+
+            <SettingRow 
+                label={appLanguage === 'en' ? 'Theme' : 'Àwọ̀'}
+                description={appLanguage === 'en' ? 'Switch between light and dark visual themes.' : 'Yí padà láàrin àwọn àwọ̀ ojú ìwò rírẹlẹ àti dúdú.'}
+            >
                 <button onClick={() => setTheme(theme === Theme.LIGHT ? Theme.DARK : Theme.LIGHT)} className="p-2 rounded-full bg-gray-200 dark:bg-gray-600">
                     {theme === Theme.LIGHT ? <MoonIcon className="w-6 h-6" /> : <SunIcon className="w-6 h-6" />}
                 </button>
             </SettingRow>
-            <SettingRow label={language === 'en' ? 'Font Size' : 'Ìwọ̀n Lẹ́tà'}>
+
+            <SettingRow 
+                label={appLanguage === 'en' ? 'Font Size' : 'Ìwọ̀n Lẹ́tà'}
+                description={appLanguage === 'en' ? 'Adjust the text size for hymn lyrics.' : 'Ṣe àtúnṣe ìwọ̀n lẹ́tà fún àkọlé orin.'}
+            >
                 <div className="flex items-center space-x-2">
                     <button onClick={() => setFontSize(FontSize.SMALL)} className={`px-3 py-1 rounded-full ${fontSize === FontSize.SMALL ? 'bg-primary-600 text-white' : 'bg-gray-200 dark:bg-gray-600'}`}>A</button>
                     <button onClick={() => setFontSize(FontSize.MEDIUM)} className={`px-3 py-1 rounded-full text-lg ${fontSize === FontSize.MEDIUM ? 'bg-primary-600 text-white' : 'bg-gray-200 dark:bg-gray-600'}`}>A</button>
                     <button onClick={() => setFontSize(FontSize.LARGE)} className={`px-3 py-1 rounded-full text-xl ${fontSize === FontSize.LARGE ? 'bg-primary-600 text-white' : 'bg-gray-200 dark:bg-gray-600'}`}>A</button>
                 </div>
             </SettingRow>
-            <SettingRow label={language === 'en' ? 'Pro Access' : 'Ànfàní Pro'}>
-                 <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" checked={isPro} onChange={() => setIsPro(!isPro)} className="sr-only peer" />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
-                </label>
-            </SettingRow>
+        </div>
+    );
+};
+
+const AboutPage = () => {
+    const context = useContext(AppContext);
+    if (!context) return null;
+    const { appLanguage } = context;
+    const currentYear = new Date().getFullYear();
+
+    return (
+        <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-md">
+            <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">
+                {appLanguage === 'en' ? 'About TLECC Hymns' : 'Nípa Orin TLECC'}
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
+                {appLanguage === 'en' 
+                    ? 'This digital hymn book is a project dedicated to preserving and making accessible the rich collection of hymns used in The Truth Living Evangelical Church of Christ (TLECC). Our goal is to provide a modern, easy-to-use platform for members and worshippers to engage with these sacred songs, both in English and Yoruba.' 
+                    : 'Ìwé orin oní-nọ́mbà yíì jẹ́ iṣẹ́ àkànṣe kan tí a yà sọ́tọ̀ fún pípa àkójọpọ̀ ọlọ́rọ̀ àwọn orin tí a ń lò ní The Truth Living Evangelical Church of Christ (TLECC) mọ́ àti ṣíṣe é ní irọ̀rùn. Èròǹgbà wa ni láti pèsè pẹpẹ ìgbàlódé, tó rọrùn láti lò fún àwọn ọmọ ìjọ àti àwọn olùjọ́sìn láti fi ara wọn bá àwọn orin mímọ́ wọ̀nyí ṣiṣẹ́, ní èdè Gẹ̀ẹ́sì àti Yorùbá.'
+                }
+            </p>
+            <div className="border-t border-gray-200 dark:border-gray-700 my-8"></div>
+            <h3 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+                {appLanguage === 'en' ? 'Connect With Us' : 'Dàpọ̀ Mọ́ Wa'}
+            </h3>
+            <div className="flex items-center space-x-6 text-gray-600 dark:text-gray-400">
+                <a href="#" className="hover:text-primary-500 transition-colors" aria-label="Facebook"><FacebookIcon className="w-7 h-7" /></a>
+                <a href="#" className="hover:text-primary-500 transition-colors" aria-label="Twitter"><TwitterIcon className="w-7 h-7" /></a>
+                <a href="#" className="hover:text-primary-500 transition-colors" aria-label="Instagram"><InstagramIcon className="w-7 h-7" /></a>
+            </div>
+            <div className="border-t border-gray-200 dark:border-gray-700 my-8"></div>
+            <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+                {appLanguage === 'en' ? `Copyright © ${currentYear} TLECC. All Rights Reserved.` : `Aṣẹ-ìwé © ${currentYear} TLECC. Gbogbo Ẹ̀tọ́ Wa Ni A Pamọ́.`}
+            </p>
         </div>
     );
 };
@@ -580,14 +765,14 @@ export const PageRenderer = () => {
     if (!context) {
         return <div className="text-center p-8">Loading...</div>;
     }
-    const { activePage, pageContext, language, loading, hymns } = context;
+    const { activePage, pageContext, appLanguage, loading, hymns } = context;
 
     // Display a loading indicator while hymns are being fetched.
     if (loading) {
         return (
             <div className="flex justify-center items-center h-full">
                 <p className="text-lg text-gray-500 dark:text-gray-400">
-                    {language === 'en' ? 'Loading Hymns...' : 'Ó ń gbé àwọn orin wọlé...'}
+                    {appLanguage === 'en' ? 'Loading Hymns...' : 'Ó ń gbé àwọn orin wọlé...'}
                 </p>
             </div>
         );
@@ -599,7 +784,7 @@ export const PageRenderer = () => {
         return (
             <div className="flex justify-center items-center h-full">
                 <p className="text-lg text-red-500">
-                    {language === 'en' ? 'Could not load hymn data.' : 'Kò lè gbé àwọn orin wọlé.'}
+                    {appLanguage === 'en' ? 'Could not load hymn data.' : 'Kò lè gbé àwọn orin wọlé.'}
                 </p>
             </div>
         );
@@ -607,8 +792,6 @@ export const PageRenderer = () => {
 
 
     switch (activePage) {
-        case Page.Home:
-            return <HomePage />;
         case Page.HymnLibrary:
             return <HymnLibraryPage />;
         case Page.HymnDetail:
@@ -621,22 +804,24 @@ export const PageRenderer = () => {
             return <DoctrinePage />;
         case Page.UpdateHymns:
             return <SimpleInfoPage 
-                title={language === 'en' ? 'Update Hymns' : 'Ṣe Àtúnṣe Orin'} 
-                content={language === 'en' ? 'Hymns are updated periodically by the development team. Please ensure you have the latest version of the app to receive new hymns and corrections.' : 'Àwọn orin ni a máa ń ṣe àtúnṣe sí nígbà gbogbo láti ọwọ́ àwọn tó ń ṣe ìdàgbàsókè. Jọ̀wọ́ rí i dájú pé o ní ẹ̀yà tuntun ìṣàfilọ́lẹ̀ náà láti gba àwọn orin tuntun àti àwọn àtúnṣe.'}
+                title={appLanguage === 'en' ? 'Update Hymns' : 'Ṣe Àtúnṣe Orin'} 
+                content={appLanguage === 'en' ? 'Hymns are updated periodically by the development team. Please ensure you have the latest version of the app to receive new hymns and corrections.' : 'Àwọn orin ni a máa ń ṣe àtúnṣe sí nígbà gbogbo láti ọwọ́ àwọn tó ń ṣe ìdàgbàsókè. Jọ̀wọ́ rí i dájú pé o ní ẹ̀yà tuntun ìṣàfilọ́lẹ̀ náà láti gba àwọn orin tuntun àti àwọn àtúnṣe.'}
             />;
         case Page.Credits:
             return <SimpleInfoPage 
-                title={language === 'en' ? 'Credits' : 'Ìdúpẹ́'} 
-                content={language === 'en' ? 'This app was developed with love for the glory of God.\n\nSpecial thanks to all contributors and the open-source community.' : 'Ìṣàfilọ́lẹ̀ yíì jẹ́ dídá pẹ̀lú ìfẹ́ fún ògo Ọlọ́run.\n\nỌpẹ́ pàtàkì sí gbogbo àwọn olùrànlọ́wọ́ àti àwùjọ open-source.'}
+                title={appLanguage === 'en' ? 'Credits' : 'Ìdúpẹ́'} 
+                content={appLanguage === 'en' ? 'This app was developed with love for the glory of God.\n\nSpecial thanks to all contributors and the open-source community.' : 'Ìṣàfilọ́lẹ̀ yíì jẹ́ dídá pẹ̀lú ìfẹ́ fún ògo Ọlọ́run.\n\nỌpẹ́ pàtàkì sí gbogbo àwọn olùrànlọ́wọ́ àti àwùjọ open-source.'}
             />;
         case Page.Donate:
             return <SimpleInfoPage 
-                title={language === 'en' ? 'Donate' : 'Ṣe Ìtọrẹ'} 
-                content={language === 'en' ? 'Your generous donations help us maintain and improve this app. Your support allows us to add new features, expand the hymn library, and keep the app free for everyone.\n\nThank you for your support!' : 'Ìtọrẹ onínúure rẹ ń ràn wá lọ́wọ́ láti tọ́jú àti láti mú ìṣàfilọ́lẹ̀ yíì dára síi. Ìtìlẹ́yìn rẹ jẹ́ kí a lè fi àwọn nǹkan tuntun kún un, mú kí àkójọpọ̀ orin pọ̀ síi, àti láti jẹ́ kí ìṣàfilọ́lẹ̀ náà wà ní ọ̀fẹ́ fún gbogbo ènìyàn.\n\nẸ ṣeun fún ìtìlẹ́yìn yín!'}
+                title={appLanguage === 'en' ? 'Donate' : 'Ṣe Ìtọrẹ'} 
+                content={appLanguage === 'en' ? 'Your generous donations help us maintain and improve this app. Your support allows us to add new features, expand the hymn library, and keep the app free for everyone.\n\nThank you for your support!' : 'Ìtọrẹ onínúure rẹ ń ràn wá lọ́wọ́ láti tọ́jú àti láti mú ìṣàfilọ́lẹ̀ yíì dára síi. Ìtìlẹ́yìn rẹ jẹ́ kí a lè fi àwọn nǹkan tuntun kún un, mú kí àkójọpọ̀ orin pọ̀ síi, àti láti jẹ́ kí ìṣàfilọ́lẹ̀ náà wà ní ọ̀fẹ́ fún gbogbo ènìyàn.\n\nẸ ṣeun fún ìtìlẹ́yìn yín!'}
             />;
         case Page.Settings:
             return <SettingsPage />;
+        case Page.About:
+            return <AboutPage />;
         default:
-            return <HomePage />;
+            return <HymnLibraryPage />;
     }
 };

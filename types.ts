@@ -33,7 +33,6 @@ export interface Hymn {
 }
 
 export enum Page {
-  Home,
   HymnLibrary,
   HymnDetail,
   Favorites,
@@ -43,19 +42,22 @@ export enum Page {
   Credits,
   Donate,
   Settings,
+  About,
 }
 
 export interface AppContextType {
   hymns: Hymn[];
   loading: boolean;
-  language: Language;
-  setLanguage: (language: Language) => void;
+  appLanguage: Language;
+  setAppLanguage: (language: Language) => void;
+  hymnLanguage: Language;
+  setHymnLanguage: (language: Language) => void;
+  defaultHymnLanguage: Language;
+  setDefaultHymnLanguage: (language: Language) => void;
   theme: Theme;
   setTheme: (theme: Theme) => void;
   fontSize: FontSize;
   setFontSize: (size: FontSize) => void;
-  isPro: boolean;
-  setIsPro: (isPro: boolean) => void;
   
   favorites: number[];
   toggleFavorite: (hymnId: number) => void;
@@ -63,6 +65,10 @@ export interface AppContextType {
 
   history: number[];
   addToHistory: (hymnId: number) => void;
+
+  recentSearches: string[];
+  addRecentSearch: (term: string) => void;
+  clearRecentSearches: () => void;
 
   activePage: Page;
   setActivePage: (page: Page, context?: any) => void;

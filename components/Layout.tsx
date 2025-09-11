@@ -2,7 +2,7 @@
 import React, { ReactNode, useContext, useState } from 'react';
 import { AppContext } from '../contexts/AppContext';
 import { Page } from '../types';
-import { HomeIcon, LibraryIcon, HeartIcon, HistoryIcon, CrossIcon, UpdateIcon, InfoIcon, DonateIcon, SettingsIcon, MenuIcon, XIcon } from './Icons';
+import { LibraryIcon, HeartIcon, HistoryIcon, CrossIcon, UpdateIcon, InfoIcon, DonateIcon, SettingsIcon, MenuIcon, XIcon, BuildingIcon } from './Icons';
 
 interface LayoutProps {
   children: ReactNode;
@@ -34,22 +34,22 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     const context = useContext(AppContext);
     if (!context) return null;
+    const { appLanguage } = context;
     
     const pageTitles = {
-        [Page.Home]: context.language === 'en' ? 'Home' : 'Ile',
-        [Page.HymnLibrary]: context.language === 'en' ? 'Hymn Library' : 'Àkójọpọ̀ Orin',
-        [Page.HymnDetail]: context.language === 'en' ? 'Hymn' : 'Orin',
-        [Page.Favorites]: context.language === 'en' ? 'Favorites' : 'Àwọn Ayànfẹ́',
-        [Page.History]: context.language === 'en' ? 'History' : 'Ìtàn',
-        [Page.ChurchDoctrine]: context.language === 'en' ? 'Church Doctrine' : 'Ẹ̀kọ́ Ìjọ',
-        [Page.UpdateHymns]: context.language === 'en' ? 'Update Hymns' : 'Ṣe Àtúnṣe Orin',
-        [Page.Credits]: context.language === 'en' ? 'Credits' : 'Ìdúpẹ́',
-        [Page.Donate]: context.language === 'en' ? 'Donate' : 'Ṣe Ìtọrẹ',
-        [Page.Settings]: context.language === 'en' ? 'Settings' : 'Ètò',
+        [Page.HymnLibrary]: appLanguage === 'en' ? 'TLECC Hymn Library' : 'Àkójọpọ̀ Orin TLECC',
+        [Page.HymnDetail]: appLanguage === 'en' ? 'Hymn' : 'Orin',
+        [Page.Favorites]: appLanguage === 'en' ? 'Favorites' : 'Àwọn Ayànfẹ́',
+        [Page.History]: appLanguage === 'en' ? 'History' : 'Ìtàn',
+        [Page.ChurchDoctrine]: appLanguage === 'en' ? 'Church Doctrine' : 'Ẹ̀kọ́ Ìjọ',
+        [Page.UpdateHymns]: appLanguage === 'en' ? 'Update Hymns' : 'Ṣe Àtúnṣe Orin',
+        [Page.Credits]: appLanguage === 'en' ? 'Credits' : 'Ìdúpẹ́',
+        [Page.Donate]: appLanguage === 'en' ? 'Donate' : 'Ṣe Ìtọrẹ',
+        [Page.Settings]: appLanguage === 'en' ? 'Settings' : 'Ètò',
+        [Page.About]: appLanguage === 'en' ? 'About TLECC Hymns' : 'Nípa Orin TLECC',
     };
 
     const navItems = [
-        { icon: <HomeIcon className="w-5 h-5" />, label: pageTitles[Page.Home], page: Page.Home },
         { icon: <LibraryIcon className="w-5 h-5" />, label: pageTitles[Page.HymnLibrary], page: Page.HymnLibrary },
         { icon: <HeartIcon className="w-5 h-5" />, label: pageTitles[Page.Favorites], page: Page.Favorites },
         { icon: <HistoryIcon className="w-5 h-5" />, label: pageTitles[Page.History], page: Page.History },
@@ -58,6 +58,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     const secondaryNavItems = [
         { icon: <UpdateIcon className="w-5 h-5" />, label: pageTitles[Page.UpdateHymns], page: Page.UpdateHymns },
+        { icon: <BuildingIcon className="w-5 h-5" />, label: pageTitles[Page.About], page: Page.About },
         { icon: <InfoIcon className="w-5 h-5" />, label: pageTitles[Page.Credits], page: Page.Credits },
         { icon: <DonateIcon className="w-5 h-5" />, label: pageTitles[Page.Donate], page: Page.Donate },
         { icon: <SettingsIcon className="w-5 h-5" />, label: pageTitles[Page.Settings], page: Page.Settings },

@@ -8,22 +8,23 @@ export const AppContext = createContext<AppContextType | null>(null);
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [hymns, setHymns] = useState<Hymn[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [language, setLanguage] = useLocalStorage<Language>('hymn-lang', Language.ENGLISH);
+  const [appLanguage, setAppLanguage] = useLocalStorage<Language>('hymn-app-lang', Language.ENGLISH);
+  const [defaultHymnLanguage, setDefaultHymnLanguage] = useLocalStorage<Language>('hymn-default-lang', Language.YORUBA);
+  const [hymnLanguage, setHymnLanguage] = useState<Language>(defaultHymnLanguage);
   const [theme, setTheme] = useLocalStorage<Theme>('hymn-theme', Theme.LIGHT);
   const [fontSize, setFontSize] = useLocalStorage<FontSize>('hymn-font-size', FontSize.MEDIUM);
-  const [isPro, setIsPro] = useLocalStorage<boolean>('hymn-pro', false);
   
   const [favorites, setFavorites] = useLocalStorage<number[]>('hymn-favorites', []);
   const [history, setHistory] = useLocalStorage<number[]>('hymn-history', []);
+  const [recentSearches, setRecentSearches] = useLocalStorage<string[]>('hymn-recent-searches', []);
 
-  const [activePage, setActivePageState] = useState<Page>(Page.Home);
+
+  const [activePage, setActivePageState] = useState<Page>(Page.HymnLibrary);
   const [pageContext, setPageContext] = useState<any>(null);
 
   useEffect(() => {
-    // This effect fetches the hymn data when the app loads.
     const fetchHymns = async () => {
       try {
-        // Fetch data from the public path.
         const response = await fetch('/contexts/hymns.json');
         if (!response.ok) {
           throw new Error(`Failed to fetch hymns: ${response.statusText}`);
@@ -38,7 +39,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
 
     fetchHymns();
-  }, []); // Empty dependency array ensures this runs only once.
+  }, []);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -46,6 +47,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     root.classList.add(theme === Theme.LIGHT ? 'light' : 'dark');
   }, [theme]);
   
+  useEffect(() => {
+    setHymnLanguage(defaultHymnLanguage);
+  }, [defaultHymnLanguage]);
+
   const toggleFavorite = useCallback((hymnId: number) => {
     setFavorites(prev => 
       prev.includes(hymnId) ? prev.filter(id => id !== hymnId) : [...prev, hymnId]
@@ -63,6 +68,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     });
   }, [setHistory]);
 
+  const addRecentSearch = useCallback((term: string) => {
+    if (!term || term.trim() === '') return;
+    const cleanedTerm = term.trim();
+    setRecentSearches(prev => {
+      const newSearches = [cleanedTerm, ...prev.filter(s => s.toLowerCase() !== cleanedTerm.toLowerCase())];
+      return newSearches.slice(0, 10); // Keep last 10 searches
+    });
+  }, [setRecentSearches]);
+
+  const clearRecentSearches = useCallback(() => {
+    setRecentSearches([]);
+  }, [setRecentSearches]);
+
   const setActivePage = (page: Page, context: any = null) => {
     setActivePageState(page);
     setPageContext(context);
@@ -72,19 +90,24 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const value: AppContextType = {
     hymns,
     loading,
-    language,
-    setLanguage,
+    appLanguage,
+    setAppLanguage,
+    hymnLanguage,
+    setHymnLanguage,
+    defaultHymnLanguage,
+    setDefaultHymnLanguage,
     theme,
     setTheme,
     fontSize,
     setFontSize,
-    isPro,
-    setIsPro,
     favorites,
     toggleFavorite,
     isFavorite,
     history,
     addToHistory,
+    recentSearches,
+    addRecentSearch,
+    clearRecentSearches,
     activePage,
     setActivePage,
     pageContext,
