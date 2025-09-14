@@ -1,6 +1,6 @@
 
 import React, { createContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { AppContextType, Hymn, Language, Theme, FontSize, Page } from '../types';
+import { AppContextType, Hymn, Language, Theme, FontSize, Page, Bookmark, ServiceHymnSlot } from '../types';
 import useLocalStorage from '../hooks/useLocalStorage';
 
 export const AppContext = createContext<AppContextType | null>(null);
@@ -11,12 +11,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [appLanguage, setAppLanguage] = useLocalStorage<Language>('hymn-app-lang', Language.ENGLISH);
   const [defaultHymnLanguage, setDefaultHymnLanguage] = useLocalStorage<Language>('hymn-default-lang', Language.YORUBA);
   const [hymnLanguage, setHymnLanguage] = useState<Language>(defaultHymnLanguage);
-  const [theme, setTheme] = useLocalStorage<Theme>('hymn-theme', Theme.LIGHT);
+  const [theme, setTheme] = useLocalStorage<Theme>('hymn-theme', Theme.SYSTEM);
   const [fontSize, setFontSize] = useLocalStorage<FontSize>('hymn-font-size', FontSize.MEDIUM);
   
   const [favorites, setFavorites] = useLocalStorage<number[]>('hymn-favorites', []);
   const [history, setHistory] = useLocalStorage<number[]>('hymn-history', []);
   const [recentSearches, setRecentSearches] = useLocalStorage<string[]>('hymn-recent-searches', []);
+  const [bookmarks, setBookmarks] = useLocalStorage<Bookmark[]>('hymn-bookmarks', []);
 
 
   const [activePage, setActivePageState] = useState<Page>(Page.HymnLibrary);
@@ -43,8 +44,26 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     const root = window.document.documentElement;
-    root.classList.remove(theme === Theme.LIGHT ? 'dark' : 'light');
-    root.classList.add(theme === Theme.LIGHT ? 'light' : 'dark');
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const applyTheme = (isDark: boolean) => {
+      root.classList.remove('light', 'dark');
+      root.classList.add(isDark ? 'dark' : 'light');
+    };
+
+    const handleChange = () => {
+      if (theme === Theme.SYSTEM) {
+        applyTheme(mediaQuery.matches);
+      }
+    };
+
+    if (theme === Theme.SYSTEM) {
+      applyTheme(mediaQuery.matches);
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    } else {
+      applyTheme(theme === Theme.DARK);
+    }
   }, [theme]);
   
   useEffect(() => {
@@ -86,6 +105,41 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setPageContext(context);
     window.scrollTo(0, 0);
   };
+  
+  // Bookmark Functions
+  const setServiceHymn = useCallback((slot: ServiceHymnSlot, hymnId: number | null) => {
+      setBookmarks(prev => {
+          // Remove any existing hymn from this slot
+          let filtered = prev.filter(b => !(b.type === 'service' && b.slot === slot));
+          // If a hymnId is provided, add the new one
+          if (hymnId !== null) {
+              filtered.push({ type: 'service', hymnId, slot, createdAt: Date.now() });
+          }
+          return filtered;
+      });
+  }, [setBookmarks]);
+
+  const setCustomBookmark = useCallback((hymnId: number, description: string) => {
+      setBookmarks(prev => {
+          // Remove existing custom bookmark for this hymn to prevent duplicates
+          const filtered = prev.filter(b => !(b.type === 'custom' && b.hymnId === hymnId));
+          filtered.push({ type: 'custom', hymnId, description, createdAt: Date.now() });
+          return filtered;
+      });
+  }, [setBookmarks]);
+  
+  const removeCustomBookmark = useCallback((hymnId: number) => {
+      setBookmarks(prev => prev.filter(b => !(b.type === 'custom' && b.hymnId === hymnId)));
+  }, [setBookmarks]);
+
+  const getCustomBookmark = useCallback((hymnId: number) => {
+      return bookmarks.find(b => b.type === 'custom' && b.hymnId === hymnId);
+  }, [bookmarks]);
+
+  const getServiceHymnSlot = useCallback((hymnId: number) => {
+      const bookmark = bookmarks.find(b => b.type === 'service' && b.hymnId === hymnId);
+      return bookmark?.type === 'service' ? bookmark.slot : undefined;
+  }, [bookmarks]);
 
   const value: AppContextType = {
     hymns,
@@ -111,6 +165,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     activePage,
     setActivePage,
     pageContext,
+    bookmarks,
+    setServiceHymn,
+    setCustomBookmark,
+    removeCustomBookmark,
+    getCustomBookmark,
+    getServiceHymnSlot
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

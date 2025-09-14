@@ -1,14 +1,15 @@
 
+
 import React, { ReactNode, useContext, useState } from 'react';
 import { AppContext } from '../contexts/AppContext';
 import { Page } from '../types';
-import { LibraryIcon, HeartIcon, HistoryIcon, CrossIcon, UpdateIcon, InfoIcon, DonateIcon, SettingsIcon, MenuIcon, XIcon, BuildingIcon } from './Icons';
+import { LibraryIcon, HeartIcon, HistoryIcon, CrossIcon, UpdateIcon, InfoIcon, DonateIcon, SettingsIcon, MenuIcon, XIcon, BuildingIcon, BookmarkIcon } from './Icons';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
-const NavItem: React.FC<{ icon: ReactNode; label: string; page: Page; }> = ({ icon, label, page }) => {
+const NavItem: React.FC<{ icon: ReactNode; label: string; page: Page; onNavigate?: () => void }> = ({ icon, label, page, onNavigate }) => {
     const context = useContext(AppContext);
     if (!context) return null;
     const { activePage, setActivePage } = context;
@@ -17,7 +18,10 @@ const NavItem: React.FC<{ icon: ReactNode; label: string; page: Page; }> = ({ ic
 
     return (
         <button
-            onClick={() => setActivePage(page)}
+            onClick={() => {
+                setActivePage(page);
+                onNavigate?.();
+            }}
             className={`flex items-center w-full px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 ${
                 isActive
                 ? 'bg-primary-500 text-white'
@@ -40,6 +44,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         [Page.HymnLibrary]: appLanguage === 'en' ? 'TLECC Hymn Library' : 'Àkójọpọ̀ Orin TLECC',
         [Page.HymnDetail]: appLanguage === 'en' ? 'Hymn' : 'Orin',
         [Page.Favorites]: appLanguage === 'en' ? 'Favorites' : 'Àwọn Ayànfẹ́',
+        [Page.Bookmarks]: appLanguage === 'en' ? 'Bookmarks' : 'Àwọn Àmì Ìwé',
         [Page.History]: appLanguage === 'en' ? 'History' : 'Ìtàn',
         [Page.ChurchDoctrine]: appLanguage === 'en' ? 'Church Doctrine' : 'Ẹ̀kọ́ Ìjọ',
         [Page.UpdateHymns]: appLanguage === 'en' ? 'Update Hymns' : 'Ṣe Àtúnṣe Orin',
@@ -52,6 +57,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     const navItems = [
         { icon: <LibraryIcon className="w-5 h-5" />, label: pageTitles[Page.HymnLibrary], page: Page.HymnLibrary },
         { icon: <HeartIcon className="w-5 h-5" />, label: pageTitles[Page.Favorites], page: Page.Favorites },
+        { icon: <BookmarkIcon className="w-5 h-5" />, label: pageTitles[Page.Bookmarks], page: Page.Bookmarks },
         { icon: <HistoryIcon className="w-5 h-5" />, label: pageTitles[Page.History], page: Page.History },
         { icon: <CrossIcon className="w-5 h-5" />, label: pageTitles[Page.ChurchDoctrine], page: Page.ChurchDoctrine },
     ];
@@ -64,14 +70,14 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         { icon: <SettingsIcon className="w-5 h-5" />, label: pageTitles[Page.Settings], page: Page.Settings },
     ];
 
-    const SidebarContent = () => (
+    const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => (
         <div className="flex flex-col h-full p-4 space-y-4">
             <h1 className="text-2xl font-bold text-primary-600 dark:text-primary-400 px-2">Hymn Book</h1>
             <nav className="flex-1 space-y-2">
-                {navItems.map(item => <NavItem key={item.page} {...item} />)}
+                {navItems.map(item => <NavItem key={item.page} {...item} onNavigate={onNavigate} />)}
             </nav>
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
-                 {secondaryNavItems.map(item => <NavItem key={item.page} {...item} />)}
+                 {secondaryNavItems.map(item => <NavItem key={item.page} {...item} onNavigate={onNavigate} />)}
             </div>
         </div>
     );
@@ -90,7 +96,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
                 }`}
             >
-                <SidebarContent />
+                <SidebarContent onNavigate={() => setSidebarOpen(false)} />
             </div>
 
             {/* Desktop Sidebar */}

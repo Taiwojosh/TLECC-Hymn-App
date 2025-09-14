@@ -7,6 +7,7 @@ export enum Language {
 export enum Theme {
   LIGHT = 'light',
   DARK = 'dark',
+  SYSTEM = 'system',
 }
 
 export enum FontSize {
@@ -36,6 +37,7 @@ export enum Page {
   HymnLibrary,
   HymnDetail,
   Favorites,
+  Bookmarks,
   History,
   ChurchDoctrine,
   UpdateHymns,
@@ -44,6 +46,23 @@ export enum Page {
   Settings,
   About,
 }
+
+export type ServiceHymnSlot = 'opening' | 'sermon' | 'closing';
+
+export type Bookmark =
+  | {
+      type: 'custom';
+      hymnId: number;
+      description: string;
+      createdAt: number;
+    }
+  | {
+      type: 'service';
+      hymnId: number;
+      slot: ServiceHymnSlot;
+      createdAt: number;
+    };
+
 
 export interface AppContextType {
   hymns: Hymn[];
@@ -73,4 +92,11 @@ export interface AppContextType {
   activePage: Page;
   setActivePage: (page: Page, context?: any) => void;
   pageContext: any;
+
+  bookmarks: Bookmark[];
+  setServiceHymn: (slot: ServiceHymnSlot, hymnId: number | null) => void;
+  setCustomBookmark: (hymnId: number, description: string) => void;
+  removeCustomBookmark: (hymnId: number) => void;
+  getCustomBookmark: (hymnId: number) => Bookmark | undefined;
+  getServiceHymnSlot: (hymnId: number) => ServiceHymnSlot | undefined;
 }
