@@ -1,0 +1,34 @@
+[
+  {
+    "name": "TLECC National Headquarters",
+    "address": "123 Gospel Way, Ikeja",
+    "city": "Lagos",
+    "state": "Lagos",
+    "phone": "+234 800 123 4567"
+  },
+  {
+    "name": "TLECC Ibadan Branch",
+    "address": "45 Faith Street, Bodija",
+    "city": "Ibadan",
+    "state": "Oyo"
+  },
+  {
+    "name": "TLECC Abuja Center",
+    "address": "Plot 777, Grace Crescent, Garki",
+    "city": "Abuja",
+    "state": "FCT",
+    "phone": "+234 800 987 6543"
+  },
+  {
+    "name": "TLECC Abeokuta Parish",
+    "address": "12 Rock Side Avenue",
+    "city": "Abeokuta",
+    "state": "Ogun"
+  },
+  {
+    "name": "TLECC London Fellowship",
+    "address": "15 King's Cross Road",
+    "city": "London",
+    "state": "UK"
+  }
+]

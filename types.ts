@@ -1,4 +1,5 @@
 
+
 export enum Language {
   ENGLISH = 'en',
   YORUBA = 'yo',
@@ -16,6 +17,14 @@ export enum FontSize {
   LARGE = 'lg',
 }
 
+export enum AccentColor {
+  GREEN = 'green',
+  BLUE = 'blue',
+  RED = 'red',
+  PURPLE = 'purple',
+  ORANGE = 'orange',
+}
+
 export interface Stanza {
   type: 'stanza' | 'chorus';
   lines: string[];
@@ -29,8 +38,23 @@ export interface Hymn {
   first_line_yo: string;
   lyrics_en: Stanza[];
   lyrics_yo: Stanza[];
-  category: string;
+  category: {
+    en: string;
+    yo: string;
+  };
   tune_code: string;
+  theme_scripture?: {
+    en: string;
+    yo: string;
+  };
+}
+
+export interface Branch {
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  phone?: string;
 }
 
 export enum Page {
@@ -40,7 +64,7 @@ export enum Page {
   Bookmarks,
   History,
   ChurchDoctrine,
-  UpdateHymns,
+  Connect,
   Credits,
   Donate,
   Settings,
@@ -63,9 +87,11 @@ export type Bookmark =
       createdAt: number;
     };
 
+export type ToastType = 'success' | 'error' | 'info';
 
 export interface AppContextType {
   hymns: Hymn[];
+  branches: Branch[];
   loading: boolean;
   appLanguage: Language;
   setAppLanguage: (language: Language) => void;
@@ -77,6 +103,8 @@ export interface AppContextType {
   setTheme: (theme: Theme) => void;
   fontSize: FontSize;
   setFontSize: (size: FontSize) => void;
+  accentColor: AccentColor;
+  setAccentColor: (color: AccentColor) => void;
   
   favorites: number[];
   toggleFavorite: (hymnId: number) => void;
@@ -99,4 +127,7 @@ export interface AppContextType {
   removeCustomBookmark: (hymnId: number) => void;
   getCustomBookmark: (hymnId: number) => Bookmark | undefined;
   getServiceHymnSlot: (hymnId: number) => ServiceHymnSlot | undefined;
+
+  toast: { message: string; type: ToastType | null };
+  showToast: (message: string, type?: ToastType) => void;
 }

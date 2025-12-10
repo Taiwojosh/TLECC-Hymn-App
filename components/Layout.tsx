@@ -3,7 +3,7 @@
 import React, { ReactNode, useContext, useState } from 'react';
 import { AppContext } from '../contexts/AppContext';
 import { Page } from '../types';
-import { LibraryIcon, HeartIcon, HistoryIcon, CrossIcon, UpdateIcon, InfoIcon, DonateIcon, SettingsIcon, MenuIcon, XIcon, BuildingIcon, BookmarkIcon } from './Icons';
+import { LibraryIcon, HeartIcon, HistoryIcon, CrossIcon, InfoIcon, DonateIcon, SettingsIcon, MenuIcon, XIcon, UsersIcon, BookmarkIcon, CheckIcon, RadioIcon } from './Icons';
 
 interface LayoutProps {
   children: ReactNode;
@@ -38,7 +38,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     const context = useContext(AppContext);
     if (!context) return null;
-    const { appLanguage } = context;
+    const { appLanguage, toast } = context;
     
     const pageTitles = {
         [Page.HymnLibrary]: appLanguage === 'en' ? 'TLECC Hymn Library' : 'Àkójọpọ̀ Orin TLECC',
@@ -47,7 +47,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         [Page.Bookmarks]: appLanguage === 'en' ? 'Bookmarks' : 'Àwọn Àmì Ìwé',
         [Page.History]: appLanguage === 'en' ? 'History' : 'Ìtàn',
         [Page.ChurchDoctrine]: appLanguage === 'en' ? 'Church Doctrine' : 'Ẹ̀kọ́ Ìjọ',
-        [Page.UpdateHymns]: appLanguage === 'en' ? 'Update Hymns' : 'Ṣe Àtúnṣe Orin',
+        [Page.Connect]: appLanguage === 'en' ? 'Connect' : 'Darapọ',
         [Page.Credits]: appLanguage === 'en' ? 'Credits' : 'Ìdúpẹ́',
         [Page.Donate]: appLanguage === 'en' ? 'Donate' : 'Ṣe Ìtọrẹ',
         [Page.Settings]: appLanguage === 'en' ? 'Settings' : 'Ètò',
@@ -60,12 +60,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         { icon: <BookmarkIcon className="w-5 h-5" />, label: pageTitles[Page.Bookmarks], page: Page.Bookmarks },
         { icon: <HistoryIcon className="w-5 h-5" />, label: pageTitles[Page.History], page: Page.History },
         { icon: <CrossIcon className="w-5 h-5" />, label: pageTitles[Page.ChurchDoctrine], page: Page.ChurchDoctrine },
+        { icon: <RadioIcon className="w-5 h-5" />, label: pageTitles[Page.Connect], page: Page.Connect },
     ];
 
     const secondaryNavItems = [
-        { icon: <UpdateIcon className="w-5 h-5" />, label: pageTitles[Page.UpdateHymns], page: Page.UpdateHymns },
-        { icon: <BuildingIcon className="w-5 h-5" />, label: pageTitles[Page.About], page: Page.About },
-        { icon: <InfoIcon className="w-5 h-5" />, label: pageTitles[Page.Credits], page: Page.Credits },
+        { icon: <InfoIcon className="w-5 h-5" />, label: pageTitles[Page.About], page: Page.About },
+        { icon: <UsersIcon className="w-5 h-5" />, label: pageTitles[Page.Credits], page: Page.Credits },
         { icon: <DonateIcon className="w-5 h-5" />, label: pageTitles[Page.Donate], page: Page.Donate },
         { icon: <SettingsIcon className="w-5 h-5" />, label: pageTitles[Page.Settings], page: Page.Settings },
     ];
@@ -84,15 +84,25 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     return (
         <div className="flex h-screen bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">
+             {/* Toast Notification */}
+             {toast.type && (
+                <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-[60] flex items-center bg-gray-900/90 dark:bg-white/90 backdrop-blur text-white dark:text-gray-900 px-6 py-3 rounded-full shadow-2xl animate-fade-in-down transition-all duration-300">
+                    {toast.type === 'info' && <InfoIcon className="w-5 h-5 mr-3 text-blue-400 dark:text-blue-600" />}
+                    {toast.type === 'success' && <CheckIcon className="w-5 h-5 mr-3 text-green-400 dark:text-green-600" />}
+                    {toast.type === 'error' && <XIcon className="w-5 h-5 mr-3 text-red-400 dark:text-red-600" />}
+                    <span className="font-medium text-sm">{toast.message}</span>
+                </div>
+            )}
+
              {/* Mobile Sidebar */}
             <div
-                className={`fixed inset-0 z-30 bg-black bg-opacity-50 transition-opacity lg:hidden ${
+                className={`fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity lg:hidden ${
                     isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}
                 onClick={() => setSidebarOpen(false)}
             ></div>
             <div
-                className={`fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-gray-900 transform transition-transform lg:hidden ${
+                className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 transform transition-transform lg:hidden ${
                     isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
                 }`}
             >
