@@ -1,7 +1,7 @@
 import React, { useContext, useState, useMemo, useRef, useEffect } from 'react';
 import { AppContext } from '../contexts/AppContext';
 import { Hymn, Language, Page, Stanza, ServiceHymnSlot, Bookmark, Branch } from '../types';
-import { ChevronLeftIcon, HeartIcon, PlayIcon, SearchIcon, ShareIcon, SunIcon, MoonIcon, TrashIcon, FilterIcon, XIcon, FontSizeIcon, ChevronDownIcon, HistoryIcon, FacebookIcon, TwitterIcon, InstagramIcon, DesktopIcon, BookmarkIcon, InfoIcon, BookOpenIcon, ChevronRightIcon, CheckIcon, UpdateIcon, RadioIcon, MapPinIcon } from './Icons';
+import { ChevronLeftIcon, HeartIcon, PlayIcon, SearchIcon, ShareIcon, SunIcon, MoonIcon, TrashIcon, FilterIcon, XIcon, FontSizeIcon, ChevronDownIcon, HistoryIcon, FacebookIcon, TwitterIcon, InstagramIcon, DesktopIcon, BookmarkIcon, InfoIcon, BookOpenIcon, ChevronRightIcon, CheckIcon, UpdateIcon, RadioIcon, MapPinIcon, DonateIcon, YouTubeIcon, WhatsAppIcon, TelegramIcon, TikTokIcon } from './Icons';
 import { Theme, FontSize, AccentColor } from '../types';
 
 
@@ -346,7 +346,7 @@ const HymnLibrary: React.FC = () => {
     const searchInputRef = useRef<HTMLInputElement>(null);
 
     // Filter Logic
-    const { processedHymns, groupedHymns, categories } = useMemo(() => {
+    const { processedHymns, groupedHymns, categories } = useMemo<{ processedHymns: Hymn[]; groupedHymns: Record<string, Hymn[]> | null; categories: string[]; }>(() => {
         let hymnsToProcess = [...hymns];
 
         // Search
@@ -423,11 +423,11 @@ const HymnLibrary: React.FC = () => {
                             <button onClick={() => toggleCategory(category)} className="w-full flex justify-between items-center p-4 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-left transition-colors">
                                 <div>
                                     <span className="font-semibold text-gray-800 dark:text-gray-200">{category}</span>
-                                    <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">({hymnsInCategory.length})</span>
+                                    <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">({(hymnsInCategory as Hymn[]).length})</span>
                                 </div>
                                 <ChevronDownIcon className={`w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform ${expandedCategories.has(category) ? 'rotate-180' : ''}`} />
                             </button>
-                            {expandedCategories.has(category) && (<ul className="p-2 space-y-2">{hymnsInCategory.map(hymn => <HymnListItem key={hymn.id} hymn={hymn} onSelect={(h) => setActivePage(Page.HymnDetail, { hymn: h })} />)}</ul>)}
+                            {expandedCategories.has(category) && (<ul className="p-2 space-y-2">{(hymnsInCategory as Hymn[]).map(hymn => <HymnListItem key={hymn.id} hymn={hymn} onSelect={(h) => setActivePage(Page.HymnDetail, { hymn: h })} />)}</ul>)}
                         </div>)) 
                     : <p className="text-center text-gray-500 mt-8">{appLanguage === 'en' ? 'No hymns found.' : 'Ko si orin ti a ri.'}</p>}
                 </div>
@@ -743,6 +743,10 @@ const ConnectPage: React.FC = () => {
                     <SocialLink icon={FacebookIcon} label="Facebook" href="#" colorClass="text-blue-600" />
                     <SocialLink icon={TwitterIcon} label="Twitter" href="#" colorClass="text-blue-400" />
                     <SocialLink icon={InstagramIcon} label="Instagram" href="#" colorClass="text-pink-600" />
+                    <SocialLink icon={YouTubeIcon} label="YouTube" href="#" colorClass="text-red-600" />
+                    <SocialLink icon={WhatsAppIcon} label="WhatsApp" href="#" colorClass="text-green-600" />
+                    <SocialLink icon={TelegramIcon} label="Telegram" href="#" colorClass="text-sky-500" />
+                    <SocialLink icon={TikTokIcon} label="TikTok" href="#" colorClass="text-gray-900 dark:text-white" />
                 </div>
             </section>
 
@@ -789,6 +793,96 @@ const ConnectPage: React.FC = () => {
                     )}
                 </div>
             </section>
+        </div>
+    );
+};
+
+const DonatePage: React.FC = () => {
+    const context = useContext(AppContext);
+    if (!context) return null;
+    const { appLanguage, showToast } = context;
+
+    // Flutterwave Link
+    const handleFlutterwaveDonate = () => {
+         // Replace this URL with the actual Flutterwave payment link when available
+        const flutterwaveLink = "https://flutterwave.com/pay/tlecc"; 
+        window.open(flutterwaveLink, '_blank');
+    };
+
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text);
+        showToast(appLanguage === 'en' ? 'Copied to clipboard!' : 'Ti daakọ!', 'success');
+    };
+
+    return (
+        <div className="max-w-2xl mx-auto space-y-6 pb-10">
+            {/* Header Card */}
+            <div className="bg-gradient-to-br from-primary-600 to-primary-800 rounded-2xl p-8 text-center text-white shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-32 h-32 bg-white opacity-10 rounded-full -mt-10 -ml-10"></div>
+                <div className="absolute bottom-0 right-0 w-40 h-40 bg-white opacity-10 rounded-full -mb-10 -mr-10"></div>
+                
+                <div className="relative z-10">
+                    <DonateIcon className="w-16 h-16 mx-auto mb-4 text-white opacity-90" />
+                    <h2 className="text-3xl font-bold mb-3">{appLanguage === 'en' ? 'Support Our Ministry' : 'Ṣe Àtìlẹ́yìn Fún Iṣẹ́ Òjíṣẹ́ Wa'}</h2>
+                    <p className="text-primary-100 mb-8 max-w-md mx-auto leading-relaxed">
+                        {appLanguage === 'en' 
+                            ? 'Your generous giving helps us spread the gospel and maintain this digital hymn book for the body of Christ.' 
+                            : 'Ìtọrẹ ànu yín ń ràn wá lọ́wọ́ láti tan ìhìn rere ká àti láti tọ́jú ìwé orin yìí fún ara Kristi.'}
+                    </p>
+                    <button 
+                        onClick={handleFlutterwaveDonate}
+                        className="inline-flex items-center px-8 py-4 bg-white text-primary-700 rounded-full font-bold text-lg hover:bg-gray-100 transition-all shadow-lg transform hover:-translate-y-1 hover:shadow-xl"
+                    >
+                        {appLanguage === 'en' ? 'Donate Online' : 'Sanwó Lórí Ayélujára'}
+                        <ChevronRightIcon className="w-5 h-5 ml-2" />
+                    </button>
+                    <p className="mt-4 text-xs text-primary-200 opacity-80">Secured by Flutterwave</p>
+                </div>
+            </div>
+
+            {/* Bank Details Card */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div className="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center">
+                        <span className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/50 flex items-center justify-center mr-3 text-primary-600 dark:text-primary-400 text-lg">🏦</span>
+                        {appLanguage === 'en' ? 'Bank Transfer Details' : 'Àlàyé Nípa Ìfowópamọ́'}
+                    </h3>
+                </div>
+                
+                <div className="p-6 space-y-5">
+                    {/* Account Name */}
+                    <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 font-semibold">{appLanguage === 'en' ? 'Account Name' : 'Orukọ Akọọlẹ'}</p>
+                        <p className="font-bold text-gray-800 dark:text-gray-200 text-lg border-b border-gray-100 dark:border-gray-700 pb-2">
+                             The Lord's Chosen Charismatic Revival Movement
+                        </p>
+                    </div>
+
+                    {/* Bank & Number */}
+                    <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                             <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 font-semibold">{appLanguage === 'en' ? 'Bank Name' : 'Orukọ Banki'}</p>
+                             <p className="font-medium text-gray-800 dark:text-gray-200 text-lg">Zenith Bank</p>
+                        </div>
+                        <div className="relative group cursor-pointer" onClick={() => copyToClipboard('1012345678')}>
+                             <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 font-semibold">{appLanguage === 'en' ? 'Account Number' : 'Nọmba Akọọlẹ'}</p>
+                             <div className="flex items-center">
+                                <p className="font-mono font-bold text-primary-600 dark:text-primary-400 text-2xl tracking-wider">1012345678</p>
+                                <div className="ml-3 px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {appLanguage === 'en' ? 'Copy' : 'Daakọ'}
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-yellow-50 dark:bg-yellow-900/10 p-4 border-t border-yellow-100 dark:border-yellow-900/20">
+                     <p className="text-sm text-yellow-800 dark:text-yellow-200 text-center italic">
+                        {appLanguage === 'en' 
+                        ? 'Please indicate "Hymn App Support" in the transaction description.' 
+                        : 'Jọ̀wọ́ kọ "Hymn App Support" síbi àpèjúwe ìbáròpọ̀ náà.'}
+                    </p>
+                </div>
+            </div>
         </div>
     );
 };
@@ -845,14 +939,7 @@ export const PageRenderer: React.FC = () => {
                 </InfoPage>
             );
         case Page.Donate:
-             return (
-                 <InfoPage title={appLanguage === 'en' ? 'Donate' : 'Ṣe Ìtọrẹ'}>
-                    <p>Support the development of this app.</p>
-                     <button className="mt-4 px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 w-full md:w-auto">
-                        {appLanguage === 'en' ? 'Donate Now' : 'Sanwó'}
-                     </button>
-                </InfoPage>
-            );
+             return <DonatePage />;
         case Page.About:
              return (
                  <InfoPage title={appLanguage === 'en' ? 'About' : 'Nípa'}>
